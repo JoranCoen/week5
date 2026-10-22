@@ -25,46 +25,68 @@ class ProvisioningApp(App[None]):
     #form {
         width: 82;
         height: 1fr;
-        padding: 1 4;
-        padding-bottom: 6;
+        padding: 0 4;
         overflow-y: auto;
         background: #101827;
     }
     #intro {
+        height: 1;
         margin-bottom: 1;
         color: #91a4bd;
     }
     .section-title {
-        margin: 1 0 0 0;
         color: #55d6c2;
         text-style: bold;
     }
     .field-label {
         color: #d9e2f0;
     }
-    Input, Select {
+    Input {
         width: 100%;
+        height: 3;
         margin-bottom: 1;
         background: #182438;
         border: tall #2b405c;
         color: #f2f6fc;
     }
+    Select {
+        width: 100%;
+        height: 3;
+        margin-bottom: 1;
+        background: #182438;
+        color: #f2f6fc;
+    }
+    Select > SelectCurrent {
+        height: 3;
+        padding: 0 1;
+        border: tall #2b405c;
+        background: #182438;
+        color: #f2f6fc;
+    }
+    Select > SelectCurrent Static#label {
+        color: #f2f6fc;
+        background: transparent;
+    }
+    Select > SelectCurrent .arrow {
+        color: #55d6c2;
+        background: transparent;
+    }
     #status {
         width: 100%;
-        min-height: 4;
-        margin: 2 0 1 0;
+        height: 2;
+        margin: 0;
         color: #d9e2f0;
     }
     #actions {
         dock: bottom;
         width: 100%;
-        height: 5;
-        padding: 1 0;
+        height: 4;
         align: center middle;
         background: #101827;
     }
     .toggle {
         width: 100%;
+        height: 3;
         margin-bottom: 1;
         text-align: left;
         background: #182438;
@@ -80,12 +102,17 @@ class ProvisioningApp(App[None]):
     }
     #provision {
         width: 100%;
+        height: 3;
         background: #55d6c2;
         color: #101827;
         text-style: bold;
     }
     #provision:hover {
         background: #7ce7d6;
+    }
+    #provision.request-valid {
+        background: #55d6c2;
+        color: #101827;
     }
     Footer {
         background: #101827;
@@ -163,9 +190,11 @@ class ProvisioningApp(App[None]):
         try:
             request = self._request()
         except ValueError as error:
+            self._reset_provision_button()
             self._status(str(error))
             return
         self._set_buttons(False)
+        self._mark_request_valid()
         self._status(f"Bezig met {request.domain}...")
         try:
             result = provision(request, self.config)
@@ -208,6 +237,16 @@ class ProvisioningApp(App[None]):
         self.query_one("#provision", Button).disabled = not enabled
         self.query_one("#https-toggle", Button).disabled = not enabled
         self.query_one("#database-toggle", Button).disabled = not enabled
+
+    def _mark_request_valid(self) -> None:
+        button = self.query_one("#provision", Button)
+        button.label = "[green]✓[/]  Gegevens kloppen — bezig..."
+        button.add_class("request-valid")
+
+    def _reset_provision_button(self) -> None:
+        button = self.query_one("#provision", Button)
+        button.label = "Website aanmaken"
+        button.remove_class("request-valid")
 
     def _update_toggle(
         self,
