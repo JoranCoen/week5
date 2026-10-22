@@ -8,6 +8,7 @@ from src.services.backup import create_backup
 from src.services.provisioner import provision
 from src.services.provisioner import ExistingSiteError
 from src.services.provisioner import check_permissions
+from src.services.bind import zone_text
 from src.services.validation import normalise_domain
 
 
@@ -82,6 +83,12 @@ class ProvisionerTests(unittest.TestCase):
             ProvisionRequest("test.sil", False, False, WebsiteType.STATIC),
             config,
         )
+
+    def test_zone_contains_self_contained_nameserver_record(self):
+        config = AppConfig(server_ip="192.0.2.10", nameserver_ip="192.0.2.53")
+        zone = zone_text("test5.sil", config)
+        self.assertIn("@ IN NS ns1.test5.sil.", zone)
+        self.assertIn("ns1 IN A 192.0.2.53", zone)
 
     def test_permission_check_creates_missing_backup_directory(self):
         with tempfile.TemporaryDirectory() as temporary:

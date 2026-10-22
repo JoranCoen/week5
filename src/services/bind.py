@@ -13,16 +13,18 @@ def zone_filename(domain: str) -> str:
 
 
 def zone_text(domain: str, config: AppConfig) -> str:
+    nameserver = f"ns1.{domain}."
     return f"""$TTL 86400
-@ IN SOA {config.nameserver} hostmaster.{domain}. (
+@ IN SOA {nameserver} hostmaster.{domain}. (
         2026102201 ; serial
         3600       ; refresh
         900        ; retry
         604800     ; expire
         86400      ; minimum
 )
-@ IN NS {config.nameserver}
+@ IN NS {nameserver}
 @ IN A {config.server_ip}
+ns1 IN A {config.nameserver_ip}
 www IN A {config.server_ip}
 """
 
@@ -40,6 +42,11 @@ def create_zone(domain: str, config: AppConfig) -> Path:
         os.replace(temporary, path)
         run_command(["named-checkzone", domain, str(path)], dry_run=config.dry_run)
         if not config.dry_run:
+            run_command(
+                ["chown", f"{config.bind_user}:{config.bind_group}", str(path)]
+            )
+            run_command(["chmod", "0640", str(path)])
+            run_command(["restorecon", "-F", str(path)])
             with config.named_conf.open("a", encoding="utf-8") as named_conf:
                 named_conf.write(declaration)
         run_command(["named-checkconf", str(config.named_conf)], dry_run=config.dry_run)

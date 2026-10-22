@@ -143,6 +143,8 @@ Voer na elke actie controles uit en toon de uitkomst in de TUI:
 - `named-checkconf` en `named-checkzone`.
 - Apache-configtest (`apachectl configtest`).
 - DNS-resolutie en HTTP(S)-status met `curl`.
+- Test lokaal met `dig @127.0.0.1 test5.sil A` en daarna met
+  `nslookup test5.sil`; de tweede gebruikt de resolver uit `/etc/resolv.conf`.
 - HTTPS-certificaat en redirectgedrag.
 - Databaseconnectie met de aangemaakte gebruiker.
 - Statische pagina, todo-flow en WordPress-bestanden.
@@ -167,6 +169,10 @@ python -m pip install -r requirements.txt
 De Python-app moet met de nodige beperkte rootrechten of via een gecontroleerd
 bevoegd helperproces draaien. Voeg geen wachtwoorden, certificaten,
 zonefiles, backups of gegenereerde websites aan Git toe.
+
+Zonefiles moeten op Rocky/RHEL leesbaar zijn voor de `named`-service. De app
+zet nieuwe zonefiles daarom op `named:named`, modus `0640`, en herstelt de
+SELinux-context met `restorecon`.
 
 Voor de standaard systeemlocaties moet de app als root worden gestart, omdat
 `/var/named`, `/etc/named.conf`, `/etc/httpd/conf.d` en de certificaatmappen

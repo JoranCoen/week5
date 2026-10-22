@@ -28,6 +28,8 @@ class AppConfig:
     server_ip: str = "127.0.0.1"
     nameserver: str = "ns1.sil."
     nameserver_ip: str = "127.0.0.1"
+    bind_user: str = "named"
+    bind_group: str = "named"
     apache_user: str = "apache"
     apache_group: str = "apache"
     dry_run: bool = False
@@ -50,6 +52,8 @@ class AppConfig:
             server_ip=os.getenv("PROVISIONER_SERVER_IP", "127.0.0.1"),
             nameserver=os.getenv("PROVISIONER_NAMESERVER", "ns1.sil."),
             nameserver_ip=os.getenv("PROVISIONER_NAMESERVER_IP", "127.0.0.1"),
+            bind_user=os.getenv("PROVISIONER_BIND_USER", "named"),
+            bind_group=os.getenv("PROVISIONER_BIND_GROUP", "named"),
             dry_run=os.getenv("PROVISIONER_DRY_RUN", "").lower() in {"1", "true", "yes"},
             wordpress_source=(
                 Path(os.environ["WORDPRESS_SOURCE"]) if os.getenv("WORDPRESS_SOURCE") else None

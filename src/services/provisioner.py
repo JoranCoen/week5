@@ -15,6 +15,7 @@ from src.services.bind import create_zone, zone_filename
 from src.services.certificates import create_certificate
 from src.services.commands import run_command
 from src.services.database import credentials_for, provision_database, drop_database, load_schema
+from src.services.dns_check import check_dns
 from src.services.templates import TODO_SCHEMA, install_website
 
 BACKUP_MESSAGE_B64 = base64.b64encode(
@@ -164,6 +165,8 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
         created.append(vhost)
         run_command(["systemctl", "reload", "named"], dry_run=config.dry_run)
         run_command(["systemctl", "reload", "httpd"], dry_run=config.dry_run)
+        if not config.dry_run:
+            check_dns(request.domain, config)
     except Exception:
         rollback_error: Exception | None = None
         if credentials is not None and not config.dry_run:
