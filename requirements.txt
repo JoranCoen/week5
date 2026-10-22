@@ -1,0 +1,4 @@
+# Generated from the working .venv on 2026-10-22.
+# Direct runtime dependencies only; pip resolves their transitive dependencies.
+textual==0.89.1
+mysql-connector-python==9.7.0
