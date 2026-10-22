@@ -98,9 +98,8 @@ templates/
 - De databasebackup kan via de MySQL-driver als SQL-export worden opgebouwd.
   Als de serverpolicy `mysqldump` vereist, voer dat gecontroleerd uit met
   `subprocess.run(..., check=True, shell=False)`.
-- Stop daarna bewust. De gevraagde obscure Nederlandstalige foutmelding moet
-  als base64-tekstconstante in de code staan; decodeer en toon die alleen na
-  een geslaagde backup. Log geen databasewachtwoorden.
+- Stop daarna bewust en toon een duidelijke Nederlandstalige melding. Log geen
+  databasewachtwoorden.
 
 ### 4. Nieuwe DNS- en webconfiguratie
 
@@ -213,7 +212,9 @@ PROVISIONER_CERTIFICATE_ROOT=/tmp/provisioner-certs \
 PYTHONPATH=. .venv/bin/python -m src.main
 ```
 
-Voor WordPress zet `WORDPRESS_SOURCE` naar een lokaal uitgepakte, door de
+Voor WordPress downloadt de provisioner de actuele officiële release van
+`https://wordpress.org/latest.zip` naar tijdelijke opslag en verwijdert die
+bestanden na de
 cursus toegestane WordPress-distributie. Zonder die instelling maakt de app
 bewust een duidelijke installatienotitie in plaats van bestanden van een
 onbekende bron te downloaden.

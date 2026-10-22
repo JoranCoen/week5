@@ -126,7 +126,6 @@ MYSQL_ADMIN_USER=root
 MYSQL_ADMIN_PASSWORD=<MYSQL-ADMIN-WACHTWOORD>
 MYSQL_DATABASE_PREFIX=site_
 MYSQL_USER_PREFIX=site_
-WORDPRESS_SOURCE=
 ```
 
 Vervang `192.168.1.1` door het echte IP-adres van de server. Controleer de
@@ -240,12 +239,15 @@ wordt ze niet overschreven: de app maakt eerst een `.tar.7z`-backup en stopt.
 
 ## 10. WordPress
 
-De app downloadt WordPress niet automatisch. Gebruik een lokaal uitgepakte,
-toegestane distributie:
+Bij een nieuwe WordPress-site downloadt de app automatisch de actuele officiële
+release van:
 
-```dotenv
-WORDPRESS_SOURCE=/opt/wordpress
+```text
+https://wordpress.org/latest.zip
 ```
+
+De ZIP wordt tijdelijk opgeslagen, gecontroleerd en uitgepakt. De tijdelijke
+bestanden worden na de provisioning verwijderd.
 
 ## 11. DNS controleren
 

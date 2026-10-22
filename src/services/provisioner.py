@@ -16,6 +16,7 @@ from src.services.commands import run_command
 from src.services.database import credentials_for, provision_database, drop_database, load_schema
 from src.services.dns_check import check_dns
 from src.services.templates import TODO_SCHEMA, install_website
+from src.services.wordpress import download_wordpress
 
 BACKUP_MESSAGE = "Deze website bestaat al; de backup staat klaar."
 
@@ -133,6 +134,7 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
     root = config.document_root / request.domain
     created: list[Path] = []
     credentials: DatabaseCredentials | None = None
+    wordpress_temporary: tempfile.TemporaryDirectory[str] | None = None
     try:
         root.mkdir(parents=True, exist_ok=False)
         created.append(root)
@@ -142,13 +144,17 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
                 if config.dry_run
                 else provision_database(request.domain, config)
             )
+        wordpress_source = None
+        if request.website_type.value == "WordPress-website" and not config.dry_run:
+            wordpress_temporary = tempfile.TemporaryDirectory(prefix="wordpress-")
+            wordpress_source = download_wordpress(Path(wordpress_temporary.name))
         install_website(
             request.domain,
             root,
             request.website_type,
             credentials,
             config.mysql_host,
-            config.wordpress_source,
+            wordpress_source,
         )
         if request.database and request.website_type.value == "todo" and credentials:
             if not config.dry_run:
@@ -175,9 +181,13 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
                 shutil.rmtree(path, ignore_errors=True)
             else:
                 path.unlink(missing_ok=True)
+        if wordpress_temporary is not None:
+            wordpress_temporary.cleanup()
         if rollback_error is not None:
             raise RuntimeError(
                 "Provisioning mislukt en database rollback mislukte ook."
             ) from rollback_error
         raise
+    if wordpress_temporary is not None:
+        wordpress_temporary.cleanup()
     return ProvisionResult(request.domain, str(root), str(vhost), str(zone), credentials)

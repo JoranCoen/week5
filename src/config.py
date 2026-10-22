@@ -60,7 +60,6 @@ class AppConfig:
     apache_user: str = "apache"
     apache_group: str = "apache"
     dry_run: bool = False
-    wordpress_source: Path | None = None
 
     @classmethod
     def from_environment(cls) -> "AppConfig":
@@ -87,7 +86,4 @@ class AppConfig:
             apache_user=_required("PROVISIONER_APACHE_USER"),
             apache_group=_required("PROVISIONER_APACHE_GROUP"),
             dry_run=_required("PROVISIONER_DRY_RUN").lower() in {"1", "true", "yes"},
-            wordpress_source=(
-                Path(os.environ["WORDPRESS_SOURCE"]) if os.getenv("WORDPRESS_SOURCE") else None
-            ),
         )
