@@ -4,7 +4,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 from zipfile import ZipFile
 
-WORDPRESS_DOWNLOAD_URL = "https://wordpress.org/latest.zip"
+WORDPRESS_DOWNLOAD_URL = "http://wordpress.org/latest.zip"
 
 
 def download_wordpress(destination: Path) -> Path:

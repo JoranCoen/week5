@@ -213,7 +213,7 @@ PYTHONPATH=. .venv/bin/python -m src.main
 ```
 
 Voor WordPress downloadt de provisioner de actuele officiële release van
-`https://wordpress.org/latest.zip` naar tijdelijke opslag en verwijdert die
+`http://wordpress.org/latest.zip` naar tijdelijke opslag en verwijdert die
 bestanden na de
 cursus toegestane WordPress-distributie. Zonder die instelling maakt de app
 bewust een duidelijke installatienotitie in plaats van bestanden van een

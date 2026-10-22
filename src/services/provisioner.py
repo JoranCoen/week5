@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 
 from src.config import AppConfig
-from src.models import DatabaseCredentials, ProvisionRequest, ProvisionResult
+from src.models import DatabaseCredentials, ProvisionRequest, ProvisionResult, WebsiteType
 from src.services.apache import create_vhost
 from src.services.backup import create_backup
 from src.services.bind import create_zone, zone_filename
@@ -83,10 +83,18 @@ def _database_dump(credentials: DatabaseCredentials, destination: Path, config: 
     else:
         with destination.open("w", encoding="utf-8") as output:
             try:
-                subprocess.run(command, check=True, stdout=output, text=True)
+                subprocess.run(
+                    command,
+                    check=True,
+                    stdout=output,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
             except (FileNotFoundError, subprocess.CalledProcessError) as exc:
                 destination.unlink(missing_ok=True)
                 raise RuntimeError("MySQL-database kon niet worden gedumpt.") from exc
+            # mysqldump can write informational warnings to stderr while
+            # still returning success; a completed dump remains valid.
     return destination
 
 
@@ -145,7 +153,7 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
                 else provision_database(request.domain, config)
             )
         wordpress_source = None
-        if request.website_type.value == "WordPress-website" and not config.dry_run:
+        if request.website_type is WebsiteType.WORDPRESS and not config.dry_run:
             wordpress_temporary = tempfile.TemporaryDirectory(prefix="wordpress-")
             wordpress_source = download_wordpress(Path(wordpress_temporary.name))
         install_website(
@@ -156,7 +164,11 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
             config.mysql_host,
             wordpress_source,
         )
-        if request.database and request.website_type.value == "todo" and credentials:
+        if (
+            request.database
+            and request.website_type is WebsiteType.TODO
+            and credentials
+        ):
             if not config.dry_run:
                 load_schema(credentials, TODO_SCHEMA, config)
         zone = create_zone(request.domain, config)

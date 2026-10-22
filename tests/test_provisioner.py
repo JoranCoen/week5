@@ -139,6 +139,26 @@ class ProvisionerTests(unittest.TestCase):
                 index,
             )
 
+    def test_wordpress_site_copies_downloaded_files(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / "wordpress"
+            root = Path(temporary) / "site"
+            source.mkdir()
+            (source / "index.php").write_text("<?php echo 'WordPress';", encoding="utf-8")
+            install_website(
+                "wp.sil",
+                root,
+                WebsiteType.WORDPRESS,
+                DatabaseCredentials("site_wp", "site_wp", "password"),
+                wordpress_source=source,
+            )
+            self.assertEqual(
+                (root / "index.php").read_text(encoding="utf-8"),
+                "<?php echo 'WordPress';",
+            )
+            self.assertFalse((root / "index.html").exists())
+            self.assertTrue((root / "wp-config.php").exists())
+
     def test_permission_check_creates_missing_backup_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

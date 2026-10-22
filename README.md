@@ -243,7 +243,7 @@ Bij een nieuwe WordPress-site downloadt de app automatisch de actuele officiële
 release van:
 
 ```text
-https://wordpress.org/latest.zip
+http://wordpress.org/latest.zip
 ```
 
 De ZIP wordt tijdelijk opgeslagen, gecontroleerd en uitgepakt. De tijdelijke
