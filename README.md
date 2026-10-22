@@ -238,54 +238,6 @@ In de TUI:
 Todo en WordPress vereisen een MySQL-database. Bestaat de website al, dan
 wordt ze niet overschreven: de app maakt eerst een `.tar.7z`-backup en stopt.
 
-## 9.1 WordPress-demo voor klant 3
-
-Voor de cursusdemo maak je de WordPress-site aan als `klant3.sil`. De
-Apache-vhost bevat automatisch ook `www.klant3.sil` als `ServerAlias`.
-Laat HTTPS uitgeschakeld: deze klant gebruikt een gewone HTTP-vhost.
-
-De app downloadt `http://wordpress.org/latest.zip`, maakt een afzonderlijke
-MySQL-database en gebruiker aan en schrijft `wp-config.php` met die gegevens.
-Gebruik voor de demo de door de app getoonde databasegegevens. Als de
-opdracht expliciet deze vaste gegevens vereist, maak ze vooraf aan in MySQL:
-
-```sql
-CREATE DATABASE wordpress;
-CREATE USER 'klant3'@'localhost' IDENTIFIED BY 'Azerty123!';
-GRANT ALL PRIVILEGES ON wordpress.* TO 'klant3'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-De webroot moet tijdelijk schrijfbaar zijn voor Apache zodat de WordPress-
-wizard bestanden kan aanmaken:
-
-```bash
-sudo chown -R apache:apache /var/www/html/klant3.sil
-sudo find /var/www/html/klant3.sil -type d -exec chmod 775 {} \;
-sudo find /var/www/html/klant3.sil -type f -exec chmod 664 {} \;
-sudo semanage fcontext -a -t httpd_sys_rw_content_t \
-  '/var/www/html/klant3.sil(/.*)?' 2>/dev/null || true
-sudo restorecon -RFv /var/www/html/klant3.sil
-```
-
-Open daarna vanaf de client:
-
-```text
-http://www.klant3.sil
-```
-
-Gebruik `http://www.klant3.sil:8888` alleen wanneer je Varnish omzeilt en
-rechtstreeks op Apache test.
-
-Rond de wizard af met de databasegegevens en maak vervolgens een pagina aan
-waarop je naam duidelijk zichtbaar is. Maak daarvan de gevraagde screenshot.
-Na de installatie kunnen de bestanden opnieuw leesbaar worden gemaakt:
-
-```bash
-sudo find /var/www/html/klant3.sil -type d -exec chmod 755 {} \;
-sudo find /var/www/html/klant3.sil -type f -exec chmod 644 {} \;
-```
-
 ## 10. WordPress
 
 Bij een nieuwe WordPress-site downloadt de app automatisch de actuele officiële

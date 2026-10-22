@@ -12,7 +12,7 @@ from src.services.apache import create_vhost
 from src.services.backup import create_backup
 from src.services.bind import create_zone, zone_filename
 from src.services.certificates import create_certificate
-from src.services.commands import run_command
+from src.services.commands import CommandError, run_command
 from src.services.database import credentials_for, provision_database, drop_database, load_schema
 from src.services.dns_check import check_dns
 from src.services.templates import TODO_SCHEMA, install_website
@@ -79,6 +79,31 @@ def prepare_wordpress_permissions(root: Path, config: AppConfig) -> None:
         run_command(["chmod", "0775", str(directory)])
     for file in (path for path in root.rglob("*") if path.is_file()):
         run_command(["chmod", "0664", str(file)])
+    context_path = f"{root}(/.*)?"
+    try:
+        run_command(
+            [
+                "semanage",
+                "fcontext",
+                "-a",
+                "-t",
+                "httpd_sys_rw_content_t",
+                context_path,
+            ]
+        )
+    except CommandError as error:
+        if "already exists" not in str(error):
+            raise
+        run_command(
+            [
+                "semanage",
+                "fcontext",
+                "-m",
+                "-t",
+                "httpd_sys_rw_content_t",
+                context_path,
+            ]
+        )
     run_command(["restorecon", "-RF", str(root)])
 
 
