@@ -18,10 +18,14 @@ TODO_SCHEMA = """CREATE TABLE todos (
  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 """
-TODO_PHP = """<?php
+TODO_CONFIG_PHP = """<?php
 declare(strict_types=1);
 $pdo = new PDO('mysql:host=__MYSQL_HOST__;dbname=__MYSQL_DATABASE__;charset=utf8mb4', '__MYSQL_USER__', '__MYSQL_PASSWORD__',
     [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+"""
+TODO_PHP = """<?php
+declare(strict_types=1);
+require __DIR__ . '/config.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && trim($_POST['title'] ?? '') !== '') {
     $statement = $pdo->prepare('INSERT INTO todos (title) VALUES (?)');
     $statement->execute([trim($_POST['title'])]);
@@ -61,13 +65,14 @@ def install_website(
     elif website_type is WebsiteType.TODO:
         if credentials is None:
             raise ValueError("Todo-site vereist databasegegevens.")
-        todo_php = (
-            TODO_PHP.replace("__MYSQL_HOST__", mysql_host)
+        todo_config = (
+            TODO_CONFIG_PHP.replace("__MYSQL_HOST__", mysql_host)
             .replace("__MYSQL_DATABASE__", credentials.name)
             .replace("__MYSQL_USER__", credentials.user)
             .replace("__MYSQL_PASSWORD__", credentials.password)
         )
-        (root / "index.php").write_text(todo_php, encoding="utf-8")
+        (root / "config.php").write_text(todo_config, encoding="utf-8")
+        (root / "index.php").write_text(TODO_PHP, encoding="utf-8")
         (root / "style.css").write_text(TODO_CSS, encoding="utf-8")
         (root / "schema.sql").write_text(TODO_SCHEMA, encoding="utf-8")
     elif website_type is WebsiteType.WORDPRESS:

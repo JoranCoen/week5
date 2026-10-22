@@ -18,9 +18,9 @@ from src.services.database import credentials_for, provision_database, drop_data
 from src.services.dns_check import check_dns
 from src.services.templates import TODO_SCHEMA, install_website
 
-BACKUP_MESSAGE_B64 = base64.b64encode(
-    "Verdomme, deze website bestond al; de backup staat klaar.".encode()
-).decode()
+BACKUP_MESSAGE_B64 = (
+    "VmVyZG9tbWUsIGRlemUgd2Vic2l0ZSBiZXN0b25kIGFsOyBkZSBiYWNrdXAgc3RhYXQga2xhYXIu"
+)
 
 
 class ExistingSiteError(RuntimeError):

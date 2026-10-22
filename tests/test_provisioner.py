@@ -11,6 +11,8 @@ from src.services.provisioner import ExistingSiteError
 from src.services.provisioner import check_permissions
 from src.services.bind import zone_text
 from src.services.validation import normalise_domain
+from src.services.templates import install_website
+from src.models import DatabaseCredentials
 
 
 class ProvisionerTests(unittest.TestCase):
@@ -117,6 +119,25 @@ class ProvisionerTests(unittest.TestCase):
         zone = zone_text("test3.sil", config)
         self.assertNotIn("127.0.0.1", zone)
         self.assertEqual(zone.count("192.168.1.1"), 3)
+
+    def test_todo_site_has_separate_database_config(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            install_website(
+                "todo.sil",
+                root,
+                WebsiteType.TODO,
+                DatabaseCredentials("site_todo", "site_todo", "safe-password"),
+                "localhost",
+            )
+            config = (root / "config.php").read_text(encoding="utf-8")
+            index = (root / "index.php").read_text(encoding="utf-8")
+            self.assertIn("dbname=site_todo", config)
+            self.assertIn("require __DIR__ . '/config.php';", index)
+            self.assertIn(
+                "$pdo->prepare('INSERT INTO todos (title) VALUES (?)')",
+                index,
+            )
 
     def test_permission_check_creates_missing_backup_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
