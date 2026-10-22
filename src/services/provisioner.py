@@ -1,6 +1,5 @@
 """Orchestration of backup and new-site provisioning."""
 
-import base64
 import os
 import shutil
 import subprocess
@@ -18,9 +17,7 @@ from src.services.database import credentials_for, provision_database, drop_data
 from src.services.dns_check import check_dns
 from src.services.templates import TODO_SCHEMA, install_website
 
-BACKUP_MESSAGE_B64 = (
-    "VmVyZG9tbWUsIGRlemUgd2Vic2l0ZSBiZXN0b25kIGFsOyBkZSBiYWNrdXAgc3RhYXQga2xhYXIu"
-)
+BACKUP_MESSAGE = "Deze website bestaat al; de backup staat klaar."
 
 
 class ExistingSiteError(RuntimeError):
@@ -131,8 +128,7 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
     check_permissions(request, config)
     if site_exists(request.domain, config):
         archive = backup_existing_site(request.domain, config)
-        message = base64.b64decode(BACKUP_MESSAGE_B64).decode()
-        raise ExistingSiteError(f"{message} Backup: {archive}")
+        raise ExistingSiteError(f"{BACKUP_MESSAGE} Backup: {archive}")
 
     root = config.document_root / request.domain
     created: list[Path] = []
