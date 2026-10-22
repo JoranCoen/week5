@@ -63,6 +63,25 @@ def check_permissions(request: ProvisionRequest, config: AppConfig) -> None:
         _require_write_access(config.certificate_root, "certificaatfolder")
 
 
+def prepare_wordpress_permissions(root: Path, config: AppConfig) -> None:
+    """Make a WordPress root writable by Apache during the install wizard."""
+    if config.dry_run:
+        return
+    run_command(
+        [
+            "chown",
+            "-R",
+            f"{config.apache_user}:{config.apache_group}",
+            str(root),
+        ]
+    )
+    for directory in (path for path in root.rglob("*") if path.is_dir()):
+        run_command(["chmod", "0775", str(directory)])
+    for file in (path for path in root.rglob("*") if path.is_file()):
+        run_command(["chmod", "0664", str(file)])
+    run_command(["restorecon", "-RF", str(root)])
+
+
 def _database_dump(credentials: DatabaseCredentials, destination: Path, config: AppConfig) -> Path:
     command = [
         "mysqldump",
@@ -164,6 +183,10 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
             config.mysql_host,
             wordpress_source,
         )
+        if not config.dry_run:
+            run_command(["restorecon", "-RF", str(root)])
+            if request.website_type is WebsiteType.WORDPRESS:
+                prepare_wordpress_permissions(root, config)
         if (
             request.database
             and request.website_type is WebsiteType.TODO
