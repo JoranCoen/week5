@@ -94,8 +94,8 @@ class ProvisionerTests(unittest.TestCase):
             nameserver_ip="192.0.2.53",
         )
         zone = zone_text("test5.sil", config)
-        self.assertIn("@ IN NS dns.example.test.", zone)
-        self.assertIn("dns IN A 192.0.2.53", zone)
+        self.assertIn("@ IN NS ns.test5.sil.", zone)
+        self.assertIn("ns IN A 192.0.2.53", zone)
 
     def test_zone_uses_configured_server_ip(self):
         config = AppConfig(server_ip="192.168.1.1", nameserver_ip="192.168.1.1")

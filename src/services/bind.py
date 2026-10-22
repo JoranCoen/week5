@@ -13,8 +13,7 @@ def zone_filename(domain: str) -> str:
 
 
 def zone_text(domain: str, config: AppConfig) -> str:
-    nameserver = config.nameserver
-    nameserver_host = nameserver.rstrip(".").split(".", 1)[0]
+    nameserver = f"ns.{domain}."
     return f"""$TTL 86400
 @ IN SOA {nameserver} hostmaster.{domain}. (
         2026102201 ; serial
@@ -25,7 +24,7 @@ def zone_text(domain: str, config: AppConfig) -> str:
 )
 @ IN NS {nameserver}
 @ IN A {config.server_ip}
-{nameserver_host} IN A {config.nameserver_ip}
+ns IN A {config.nameserver_ip}
 www IN A {config.server_ip}
 """
 
