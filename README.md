@@ -271,8 +271,9 @@ resolvectl status
 
 ## 12. Apache en HTTPS controleren
 
-Apache-sites van deze provisioner luisteren op poort `8888`. HTTPS blijft op
-poort `443`. Varnish wordt niet door deze app geconfigureerd.
+Apache-sites van deze provisioner luisteren op poort `8888`. Configureer
+`Listen 8888` precies één keer in de Apache-serverconfiguratie. HTTPS blijft
+op poort `443`. Varnish wordt niet door deze app geconfigureerd.
 
 ```bash
 sudo apachectl configtest

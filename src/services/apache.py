@@ -37,10 +37,6 @@ def vhost_text(domain: str, root: Path, https: bool, config: AppConfig) -> str:
 
 def create_vhost(domain: str, root: Path, https: bool, config: AppConfig) -> Path:
     config.vhost_root.mkdir(parents=True, exist_ok=True)
-    if not https:
-        listener = config.vhost_root / "00-provisioner-listen.conf"
-        if not listener.exists():
-            listener.write_text(f"Listen {config.http_port}\n", encoding="utf-8")
     path = config.vhost_root / f"{domain}.conf"
     if path.exists():
         raise FileExistsError(f"Vhost bestaat al: {path}")
