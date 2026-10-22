@@ -200,6 +200,8 @@ class ProvisioningApp(App[None]):
             result = provision(request, self.config)
         except ExistingSiteError as error:
             self._status(str(error))
+        except PermissionError as error:
+            self._status(f"Rechten ontbreken: {error}")
         except Exception as error:
             self._status(f"Niet uitgevoerd: {error}")
         else:

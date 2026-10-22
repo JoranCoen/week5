@@ -1,6 +1,7 @@
 """Orchestration of backup and new-site provisioning."""
 
 import base64
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -22,6 +23,34 @@ BACKUP_MESSAGE_B64 = base64.b64encode(
 
 class ExistingSiteError(RuntimeError):
     """Raised after an existing site was backed up."""
+
+
+def _require_write_access(path: Path, label: str) -> None:
+    parent = path if path.is_dir() else path.parent
+    if not parent.exists() or not os.access(parent, os.W_OK | os.X_OK):
+        raise PermissionError(
+            f"Geen schrijfrechten voor {label}: {parent}. "
+            "Start de provisioning-app met sudo."
+        )
+
+
+def check_permissions(request: ProvisionRequest, config: AppConfig) -> None:
+    """Fail before changing anything when the server paths are not writable."""
+    if config.dry_run:
+        return
+    _require_write_access(config.zone_root, "BIND-zonefolder")
+    _require_write_access(config.document_root, "website-root")
+    _require_write_access(config.vhost_root, "Apache-vhostfolder")
+    _require_write_access(config.backup_root, "backupfolder")
+    if not config.named_conf.exists():
+        _require_write_access(config.named_conf, "named.conf")
+    elif not os.access(config.named_conf, os.W_OK):
+        raise PermissionError(
+            f"Geen schrijfrechten voor named.conf: {config.named_conf}. "
+            "Start de provisioning-app met sudo."
+        )
+    if request.https:
+        _require_write_access(config.certificate_root, "certificaatfolder")
 
 
 def _database_dump(credentials: DatabaseCredentials, destination: Path, config: AppConfig) -> Path:
@@ -87,6 +116,7 @@ def backup_existing_site(domain: str, config: AppConfig) -> Path:
 
 def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
     """Provision one site; existing sites are backed up and never overwritten."""
+    check_permissions(request, config)
     if site_exists(request.domain, config):
         archive = backup_existing_site(request.domain, config)
         message = base64.b64decode(BACKUP_MESSAGE_B64).decode()

@@ -7,6 +7,7 @@ from src.models import ProvisionRequest, WebsiteType
 from src.services.backup import create_backup
 from src.services.provisioner import provision
 from src.services.provisioner import ExistingSiteError
+from src.services.provisioner import check_permissions
 from src.services.validation import normalise_domain
 
 
@@ -59,6 +60,7 @@ class ProvisionerTests(unittest.TestCase):
                 document_root=root / "www",
                 vhost_root=root / "vhosts",
                 certificate_root=root / "certs",
+                dry_run=True,
             )
             existing_root = config.document_root / "old.sil"
             existing_root.mkdir(parents=True)
@@ -73,6 +75,13 @@ class ProvisionerTests(unittest.TestCase):
                 "original",
             )
             self.assertEqual(len(list(config.backup_root.glob("*.tar.7z"))), 1)
+
+    def test_dry_run_skips_system_permission_check(self):
+        config = AppConfig(dry_run=True)
+        check_permissions(
+            ProvisionRequest("test.sil", False, False, WebsiteType.STATIC),
+            config,
+        )
 
 
 if __name__ == "__main__":

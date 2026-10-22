@@ -168,6 +168,19 @@ De Python-app moet met de nodige beperkte rootrechten of via een gecontroleerd
 bevoegd helperproces draaien. Voeg geen wachtwoorden, certificaten,
 zonefiles, backups of gegenereerde websites aan Git toe.
 
+Voor de standaard systeemlocaties moet de app als root worden gestart, omdat
+`/var/named`, `/etc/named.conf`, `/etc/httpd/conf.d` en de certificaatmappen
+niet schrijfbaar zijn voor een gewone gebruiker:
+
+```bash
+sudo --preserve-env=PROVISIONER_SERVER_IP,PROVISIONER_NAMESERVER,PROVISIONER_NAMESERVER_IP \
+  env PYTHONPATH="$PWD" "$PWD/.venv/bin/python" -m src.main
+```
+
+De app controleert deze schrijfrechten vooraf en stopt met een duidelijke
+melding vóór er bestanden worden aangemaakt. Voor lokale tests kan
+`PROVISIONER_DRY_RUN=1` met tijdelijke mappen worden gebruikt.
+
 De huidige basisapp kan eerst veilig getest worden met de paden uit een
 tijdelijke map:
 
