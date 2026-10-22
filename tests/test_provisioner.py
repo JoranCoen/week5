@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import os
 from pathlib import Path
 
 from src.config import AppConfig
@@ -89,6 +90,29 @@ class ProvisionerTests(unittest.TestCase):
         zone = zone_text("test5.sil", config)
         self.assertIn("@ IN NS ns1.test5.sil.", zone)
         self.assertIn("ns1 IN A 192.0.2.53", zone)
+
+    def test_zone_uses_configured_server_ip(self):
+        config = AppConfig(server_ip="192.168.1.1", nameserver_ip="192.168.1.1")
+        zone = zone_text("test2.sil", config)
+        self.assertIn("@ IN A 192.168.1.1", zone)
+        self.assertIn("www IN A 192.168.1.1", zone)
+
+    def test_environment_configuration_uses_explicit_server_ip(self):
+        original = os.environ.get("PROVISIONER_SERVER_IP")
+        os.environ["PROVISIONER_SERVER_IP"] = "192.168.1.1"
+        try:
+            self.assertEqual(AppConfig.from_environment().server_ip, "192.168.1.1")
+        finally:
+            if original is None:
+                os.environ.pop("PROVISIONER_SERVER_IP", None)
+            else:
+                os.environ["PROVISIONER_SERVER_IP"] = original
+
+    def test_zone_text_does_not_use_localhost_when_server_ip_is_configured(self):
+        config = AppConfig(server_ip="192.168.1.1", nameserver_ip="192.168.1.1")
+        zone = zone_text("test3.sil", config)
+        self.assertNotIn("127.0.0.1", zone)
+        self.assertEqual(zone.count("192.168.1.1"), 3)
 
     def test_permission_check_creates_missing_backup_directory(self):
         with tempfile.TemporaryDirectory() as temporary:

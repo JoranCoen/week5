@@ -42,6 +42,8 @@ alle overige taken.
 - Controleer Rocky/RHEL-versie, Python 3.12+, SELinux-status en actieve services.
 - Noteer de echte paden voor BIND-zonefiles, Apache vhosts, document roots,
   logs, certificaten en MySQL.
+- De standaard Apache-documentroot van deze app is `/var/www/html`; pas
+  `PROVISIONER_DOCUMENT_ROOT` alleen aan als de serverconfiguratie afwijkt.
 - Leg deze paden vast in één configuratiemodule of `.env`-bestand; hardcode geen
   wachtwoorden of server-specifieke paden in de UI.
 - Controleer dat BIND, Apache/httpd, PHP-FPM, MySQL en OpenSSL geïnstalleerd
@@ -180,6 +182,17 @@ niet schrijfbaar zijn voor een gewone gebruiker:
 
 ```bash
 sudo --preserve-env=PROVISIONER_SERVER_IP,PROVISIONER_NAMESERVER,PROVISIONER_NAMESERVER_IP \
+  env PYTHONPATH="$PWD" "$PWD/.venv/bin/python" -m src.main
+```
+
+De app leest uitsluitend het project-`.env`-bestand. Vul dit bestand volledig
+in op basis van `.env.example`; shell-variabelen worden niet gebruikt:
+
+```bash
+set -a
+source .env
+set +a
+sudo --preserve-env=PROVISIONER_SERVER_IP,PROVISIONER_NAMESERVER,PROVISIONER_NAMESERVER_IP,PROVISIONER_DRY_RUN \
   env PYTHONPATH="$PWD" "$PWD/.venv/bin/python" -m src.main
 ```
 
