@@ -196,17 +196,6 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
                 if config.dry_run
                 else provision_database(request.domain, config)
             )
-        website_credentials = credentials
-        if (
-            request.website_type is WebsiteType.WORDPRESS
-            and credentials is not None
-            and config.mysql_admin_password
-        ):
-            website_credentials = DatabaseCredentials(
-                credentials.name,
-                config.mysql_admin_user,
-                config.mysql_admin_password,
-            )
         wordpress_source = None
         if request.website_type is WebsiteType.WORDPRESS and not config.dry_run:
             wordpress_temporary = tempfile.TemporaryDirectory(prefix="wordpress-")
@@ -215,7 +204,7 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
             request.domain,
             root,
             request.website_type,
-            website_credentials,
+            credentials,
             config.mysql_host,
             wordpress_source,
         )
