@@ -4,6 +4,7 @@ import base64
 import os
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 from src.config import AppConfig
@@ -26,12 +27,22 @@ class ExistingSiteError(RuntimeError):
 
 
 def _require_write_access(path: Path, label: str) -> None:
+    if not path.exists() and path.suffix == "":
+        path.mkdir(parents=True, exist_ok=True)
     parent = path if path.is_dir() else path.parent
-    if not parent.exists() or not os.access(parent, os.W_OK | os.X_OK):
+    try:
+        parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            mode="w", prefix=".provisioner-write-test-", dir=parent
+        ) as test_file:
+            test_file.write("write-test")
+            test_file.flush()
+    except (OSError, PermissionError) as error:
         raise PermissionError(
             f"Geen schrijfrechten voor {label}: {parent}. "
-            "Start de provisioning-app met sudo."
-        )
+            "Controleer de eigenaar/permissies en start de provisioning-app "
+            "met sudo."
+        ) from error
 
 
 def check_permissions(request: ProvisionRequest, config: AppConfig) -> None:

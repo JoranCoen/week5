@@ -83,6 +83,23 @@ class ProvisionerTests(unittest.TestCase):
             config,
         )
 
+    def test_permission_check_creates_missing_backup_directory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config = AppConfig(
+                backup_root=root / "missing" / "backups",
+                zone_root=root / "zones",
+                document_root=root / "www",
+                vhost_root=root / "vhosts",
+                named_conf=root / "named.conf",
+                dry_run=False,
+            )
+            check_permissions(
+                ProvisionRequest("test.sil", False, False, WebsiteType.STATIC),
+                config,
+            )
+            self.assertTrue(config.backup_root.is_dir())
+
 
 if __name__ == "__main__":
     unittest.main()

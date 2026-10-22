@@ -201,7 +201,7 @@ class ProvisioningApp(App[None]):
         except ExistingSiteError as error:
             self._status(str(error))
         except PermissionError as error:
-            self._status(f"Rechten ontbreken: {error}")
+            self._status(f"Rechten ontbreken. {error}")
         except Exception as error:
             self._status(f"Niet uitgevoerd: {error}")
         else:
