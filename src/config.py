@@ -46,6 +46,7 @@ class AppConfig:
     document_root: Path = Path("/var/www/html")
     vhost_root: Path = Path("/etc/httpd/conf.d")
     certificate_root: Path = Path("/etc/pki/tls")
+    http_port: int = 8888
     mysql_host: str = "localhost"
     mysql_port: int = 3306
     mysql_admin_user: str = "root"
@@ -72,6 +73,7 @@ class AppConfig:
             document_root=Path(_required("PROVISIONER_DOCUMENT_ROOT")),
             vhost_root=Path(_required("PROVISIONER_VHOST_ROOT")),
             certificate_root=Path(_required("PROVISIONER_CERTIFICATE_ROOT")),
+            http_port=int(_required("PROVISIONER_HTTP_PORT")),
             mysql_host=_required("MYSQL_HOST"),
             mysql_port=int(_required("MYSQL_PORT")),
             mysql_admin_user=_required("MYSQL_ADMIN_USER"),

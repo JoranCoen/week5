@@ -113,6 +113,7 @@ PROVISIONER_NAMED_CONF=/etc/named.conf
 PROVISIONER_DOCUMENT_ROOT=/var/www/html
 PROVISIONER_VHOST_ROOT=/etc/httpd/conf.d
 PROVISIONER_CERTIFICATE_ROOT=/etc/pki/tls
+PROVISIONER_HTTP_PORT=8888
 PROVISIONER_SERVER_IP=192.168.1.1
 PROVISIONER_NAMESERVER=ns1.sil.
 PROVISIONER_NAMESERVER_IP=192.168.1.1
@@ -270,10 +271,13 @@ resolvectl status
 
 ## 12. Apache en HTTPS controleren
 
+Apache-sites van deze provisioner luisteren op poort `8888`. HTTPS blijft op
+poort `443`. Varnish wordt niet door deze app geconfigureerd.
+
 ```bash
 sudo apachectl configtest
 sudo systemctl reload httpd
-curl -I http://test5.sil
+curl -I http://test5.sil:8888
 curl -k -I https://test5.sil
 ```
 
