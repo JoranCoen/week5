@@ -199,10 +199,13 @@ class ProvisioningApp(App[None]):
         try:
             result = provision(request, self.config)
         except ExistingSiteError as error:
+            self._reset_provision_button()
             self._status(str(error))
         except PermissionError as error:
+            self._reset_provision_button()
             self._status(f"Rechten ontbreken. {error}")
         except Exception as error:
+            self._reset_provision_button()
             self._status(f"Niet uitgevoerd: {error}")
         else:
             database = (
@@ -213,6 +216,7 @@ class ProvisioningApp(App[None]):
             self._status(
                 f"Klaar: {result.domain}.{database}\nDocument root: {result.document_root}"
             )
+            self._mark_provisioned()
         finally:
             self._set_buttons(True)
 
@@ -249,6 +253,11 @@ class ProvisioningApp(App[None]):
         button = self.query_one("#provision", Button)
         button.label = "Website aanmaken"
         button.remove_class("request-valid")
+
+    def _mark_provisioned(self) -> None:
+        button = self.query_one("#provision", Button)
+        button.label = "[green]✓[/]  Website aangemaakt"
+        button.add_class("request-valid")
 
     def _update_toggle(
         self,
