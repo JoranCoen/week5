@@ -245,7 +245,8 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
             wordpress_temporary.cleanup()
         if rollback_error is not None:
             raise RuntimeError(
-                "Provisioning mislukt en database rollback mislukte ook."
+                "Provisioning mislukt en database rollback mislukte ook: "
+                f"{rollback_error}"
             ) from rollback_error
         raise
     if wordpress_temporary is not None:

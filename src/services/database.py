@@ -49,14 +49,20 @@ def provision_database(domain: str, config: AppConfig) -> DatabaseCredentials:
     finally:
         cursor.close()
         connection.close()
-    verify_connection = mysql.connector.connect(
-        host=config.mysql_host,
-        port=config.mysql_port,
-        user=credentials.user,
-        password=credentials.password,
-        database=credentials.name,
-    )
-    verify_connection.close()
+    try:
+        verify_connection = mysql.connector.connect(
+            host=config.mysql_host,
+            port=config.mysql_port,
+            user=credentials.user,
+            password=credentials.password,
+            database=credentials.name,
+        )
+        verify_connection.close()
+    except mysql.connector.Error as error:
+        raise RuntimeError(
+            f"MySQL-gebruiker {credentials.user} kan niet verbinden met "
+            f"database {credentials.name}: {error.msg}"
+        ) from error
     return credentials
 
 
