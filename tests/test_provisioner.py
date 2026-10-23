@@ -162,6 +162,9 @@ class ProvisionerTests(unittest.TestCase):
             self.assertIn("define('DB_NAME', 'site_wp');", wp_config)
             self.assertIn("define('DB_USER', 'site_wp');", wp_config)
             self.assertIn("define('DB_PASSWORD', 'password');", wp_config)
+            self.assertIn("$table_prefix = 'wp_';", wp_config)
+            self.assertIn("define('ABSPATH', __DIR__ . '/');", wp_config)
+            self.assertIn("require_once ABSPATH . 'wp-settings.php';", wp_config)
 
     def test_permission_check_creates_missing_backup_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
