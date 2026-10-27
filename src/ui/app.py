@@ -208,7 +208,6 @@ class ProvisioningApp(App[None]):
         except ExistingSiteError as error:
             message = f"Backup succesvol gemaakt.\n{error}"
             self._status(message)
-            self.notify(message, title="Backup voltooid", severity="information")
             self._mark_backup_created()
             self.backup_completed = True
         except PermissionError as error:
