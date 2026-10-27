@@ -238,6 +238,28 @@ In de TUI:
 Todo en WordPress vereisen een MySQL-database. Bestaat de website al, dan
 wordt ze niet overschreven: de app maakt eerst een `.tar.7z`-backup en stopt.
 
+### Todo-website
+
+Bij een Todo-website wordt de applicatie uit `assets/todo-site.zip` naar de
+documentroot gekopieerd. Daarna vraagt de wizard het wachtwoord voor de nieuwe
+MySQL-gebruiker. De database heet bijvoorbeeld `site_todo20` en de
+MySQL-gebruikersnaam is het domein zonder `.sil`, bijvoorbeeld `todo20`.
+De SQL uit `todo.sql` wordt geladen en `includes/config.php` wordt automatisch
+ingevuld.
+
+Het MySQL-wachtwoord is niet hetzelfde als de Todo-app-login. De meegeleverde
+database bevat standaard de applicatiegebruiker `admin` met wachtwoord
+`Azerty123`. Wijzig dit wachtwoord na de eerste login als de site publiek
+bereikbaar is.
+
+Controleer de aangemaakte MySQL-gebruiker en rechten met:
+
+```bash
+sudo mysql -e "SELECT User, Host FROM mysql.user WHERE User = 'todo20';"
+sudo mysql -e "SHOW GRANTS FOR 'todo20'@'localhost';"
+mysql -u todo20 -p -h localhost site_todo20
+```
+
 ## 10. WordPress
 
 Bij een nieuwe WordPress-site downloadt de app automatisch de actuele officiële
@@ -249,6 +271,10 @@ http://wordpress.org/latest.zip
 
 De ZIP wordt tijdelijk opgeslagen, gecontroleerd en uitgepakt. De tijdelijke
 bestanden worden na de provisioning verwijderd.
+
+De gegenereerde `wp-config.php` bevat de databasegegevens, `$table_prefix`,
+`ABSPATH` en de WordPress-bootstrap. Voltooi na provisioning de installatie
+via `/wp-admin/install.php`.
 
 ## 11. DNS controleren
 

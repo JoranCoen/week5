@@ -13,6 +13,7 @@ from src.services.bind import zone_text
 from src.services.validation import normalise_domain
 from src.services.templates import install_website
 from src.models import DatabaseCredentials
+from src.services.database import credentials_for
 
 
 class ProvisionerTests(unittest.TestCase):
@@ -136,6 +137,13 @@ class ProvisionerTests(unittest.TestCase):
             self.assertIn("DB_NAME', 'site_todo'", config)
             self.assertTrue((root / "browse.php").exists())
             self.assertTrue((root / "includes" / "Twig" / "Autoloader.php").exists())
+
+    def test_database_credentials_use_domain_and_requested_password(self):
+        config = AppConfig(dry_run=True)
+        credentials = credentials_for("todo20.sil", config, "chosen-password")
+        self.assertEqual(credentials.name, "site_todo20")
+        self.assertEqual(credentials.user, "todo20")
+        self.assertEqual(credentials.password, "chosen-password")
 
     def test_wordpress_site_copies_downloaded_files(self):
         with tempfile.TemporaryDirectory() as temporary:

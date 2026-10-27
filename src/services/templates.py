@@ -13,7 +13,6 @@ STATIC_HTML = """<!doctype html>
 </html>
 """
 
-TODO_CSS = "body { max-width: 48rem; margin: 2rem auto; font-family: sans-serif; }\n"
 WORDPRESS_README = """WordPress-bestanden moeten hier geplaatst worden.
 Installeer de voorgeschreven WordPress-versie op de server en voltooi daarna
 de installatie via de website.
