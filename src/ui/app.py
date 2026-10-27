@@ -205,7 +205,10 @@ class ProvisioningApp(App[None]):
         try:
             result = provision(request, self.config)
         except ExistingSiteError as error:
-            self._status(f"Backup gemaakt. {error}")
+            self._status(
+                "Backup succesvol gemaakt.\n"
+                f"{error}"
+            )
             self._mark_backup_created()
         except PermissionError as error:
             self._reset_provision_button()
