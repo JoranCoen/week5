@@ -181,7 +181,7 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
                 credentials_for(request.domain, config, request.database_password)
                 if config.dry_run
                 else provision_database(
-                request.domain, config, request.database_password
+                    request.domain, config, request.database_password
                 )
             )
         wordpress_source = None

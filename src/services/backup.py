@@ -42,7 +42,10 @@ def create_backup(
         resolved_seven_zip,
         "a",
         "-t7z",
-        "-mx=9",
+        # Keep backups responsive on small production VMs while SSH/httpd run.
+        "-mx=5",
+        "-mmt=1",
+        "-md=16m",
         str(compressed_path),
         str(tar_path),
     ]
