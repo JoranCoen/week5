@@ -73,7 +73,7 @@ class ProvisioningApp(App[None]):
     }
     #status {
         width: 100%;
-        height: 2;
+        height: 4;
         margin: 0;
         color: #d9e2f0;
     }
@@ -125,6 +125,7 @@ class ProvisioningApp(App[None]):
         self.config = AppConfig.from_environment()
         self.use_https = False
         self.has_database = False
+        self.backup_completed = False
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -205,11 +206,11 @@ class ProvisioningApp(App[None]):
         try:
             result = provision(request, self.config)
         except ExistingSiteError as error:
-            self._status(
-                "Backup succesvol gemaakt.\n"
-                f"{error}"
-            )
+            message = f"Backup succesvol gemaakt.\n{error}"
+            self._status(message)
+            self.notify(message, title="Backup voltooid", severity="information")
             self._mark_backup_created()
+            self.backup_completed = True
         except PermissionError as error:
             self._reset_provision_button()
             self._status(f"Rechten ontbreken. {error}")
@@ -228,6 +229,8 @@ class ProvisioningApp(App[None]):
             self._mark_provisioned()
         finally:
             self._set_buttons(True)
+            if self.backup_completed:
+                self.query_one("#provision", Button).disabled = True
 
     def _request(self) -> ProvisionRequest:
         domain = normalise_domain(self.query_one("#domain", Input).value)
