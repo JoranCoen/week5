@@ -11,19 +11,34 @@ def _identifier(value: str) -> str:
     return "".join(character if character.isalnum() else "_" for character in value)
 
 
-def credentials_for(domain: str, config: AppConfig) -> DatabaseCredentials:
+def credentials_for(
+    domain: str,
+    config: AppConfig,
+    password: str | None = None,
+) -> DatabaseCredentials:
     token = _identifier(domain.removesuffix(".sil"))[:24]
     name = f"{config.mysql_database_prefix}{token}".lower()[:64]
-    user = f"{config.mysql_user_prefix}{token}".lower()[:32]
+    user = token.lower()[:32]
+    if not user:
+        raise ValueError("Domein levert geen geldige MySQL-gebruikersnaam op.")
+    if password is not None and not password:
+        raise ValueError("MySQL-wachtwoord mag niet leeg zijn.")
     alphabet = string.ascii_letters + string.digits + "!@#$%^&*_-"
-    return DatabaseCredentials(name, user, "".join(secrets.choice(alphabet) for _ in range(24)))
+    selected_password = password or "".join(
+        secrets.choice(alphabet) for _ in range(24)
+    )
+    return DatabaseCredentials(name, user, selected_password)
 
 
-def provision_database(domain: str, config: AppConfig) -> DatabaseCredentials:
+def provision_database(
+    domain: str,
+    config: AppConfig,
+    password: str | None = None,
+) -> DatabaseCredentials:
     """Create a database and least-privilege user with parameterized values."""
     import mysql.connector
 
-    credentials = credentials_for(domain, config)
+    credentials = credentials_for(domain, config, password)
     connection = mysql.connector.connect(
         host=config.mysql_host,
         port=config.mysql_port,

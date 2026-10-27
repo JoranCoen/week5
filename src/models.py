@@ -16,6 +16,7 @@ class ProvisionRequest:
     https: bool
     database: bool
     website_type: WebsiteType = WebsiteType.STATIC
+    database_password: str | None = None
 
 
 @dataclass(frozen=True)

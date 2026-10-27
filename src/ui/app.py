@@ -150,6 +150,12 @@ class ProvisioningApp(App[None]):
                 id="database-toggle",
                 classes="toggle",
             )
+            yield Label("MySQL-wachtwoord", classes="field-label")
+            yield Input(
+                placeholder="Wachtwoord voor de nieuwe MySQL-gebruiker",
+                password=True,
+                id="database-password",
+            )
 
             yield Label("3. Inhoud", classes="section-title")
             yield Label("Type website", classes="field-label")
@@ -229,11 +235,19 @@ class ProvisioningApp(App[None]):
             raise ValueError("Todo en WordPress vereisen een MySQL-database.")
         if website_type is WebsiteType.STATIC and self.has_database:
             raise ValueError("Kies voor een database een todo- of WordPress-website.")
+        database_password = (
+            self.query_one("#database-password", Input).value
+            if self.has_database
+            else None
+        )
+        if self.has_database and not database_password:
+            raise ValueError("Vul het MySQL-wachtwoord in.")
         return ProvisionRequest(
             domain=domain,
             https=self.use_https,
             database=self.has_database,
             website_type=website_type,
+            database_password=database_password,
         )
 
     def _status(self, message: str) -> None:

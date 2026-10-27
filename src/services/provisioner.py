@@ -15,7 +15,7 @@ from src.services.certificates import create_certificate
 from src.services.commands import run_command
 from src.services.database import credentials_for, provision_database, drop_database, load_schema
 from src.services.dns_check import check_dns
-from src.services.templates import TODO_SCHEMA, install_website
+from src.services.templates import install_website, todo_schema
 from src.services.wordpress import download_wordpress
 
 BACKUP_MESSAGE = "Deze website bestaat al; de backup staat klaar."
@@ -166,9 +166,11 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
         created.append(root)
         if request.database:
             credentials = (
-                credentials_for(request.domain, config)
+                credentials_for(request.domain, config, request.database_password)
                 if config.dry_run
-                else provision_database(request.domain, config)
+                else provision_database(
+                request.domain, config, request.database_password
+                )
             )
         wordpress_source = None
         if request.website_type is WebsiteType.WORDPRESS and not config.dry_run:
@@ -192,7 +194,7 @@ def provision(request: ProvisionRequest, config: AppConfig) -> ProvisionResult:
             and credentials
         ):
             if not config.dry_run:
-                load_schema(credentials, TODO_SCHEMA, config)
+                load_schema(credentials, todo_schema(), config)
         zone = create_zone(request.domain, config)
         created.append(zone)
         if request.https:

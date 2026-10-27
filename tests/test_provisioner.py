@@ -130,14 +130,12 @@ class ProvisionerTests(unittest.TestCase):
                 DatabaseCredentials("site_todo", "site_todo", "safe-password"),
                 "localhost",
             )
-            config = (root / "config.php").read_text(encoding="utf-8")
-            index = (root / "index.php").read_text(encoding="utf-8")
-            self.assertIn("dbname=site_todo", config)
-            self.assertIn("require __DIR__ . '/config.php';", index)
-            self.assertIn(
-                "$pdo->prepare('INSERT INTO todos (title) VALUES (?)')",
-                index,
-            )
+            config = (root / "includes" / "config.php").read_text(encoding="utf-8")
+            self.assertIn("DB_USER', 'site_todo'", config)
+            self.assertIn("DB_PASS', 'safe-password'", config)
+            self.assertIn("DB_NAME', 'site_todo'", config)
+            self.assertTrue((root / "browse.php").exists())
+            self.assertTrue((root / "includes" / "Twig" / "Autoloader.php").exists())
 
     def test_wordpress_site_copies_downloaded_files(self):
         with tempfile.TemporaryDirectory() as temporary:
