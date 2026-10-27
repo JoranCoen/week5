@@ -120,15 +120,27 @@ def site_paths(domain: str, config: AppConfig) -> tuple[Path, Path]:
     return config.document_root / domain, config.vhost_root / f"{domain}.conf"
 
 
+def _website_roots(domain: str, config: AppConfig) -> list[Path]:
+    """Return supported document-root layouts without duplicating a root."""
+    roots = [
+        config.document_root / domain,
+        config.document_root / "vhosts" / domain,
+    ]
+    return list(dict.fromkeys(roots))
+
+
 def site_exists(domain: str, config: AppConfig) -> bool:
-    root, vhost = site_paths(domain, config)
-    return root.exists() or vhost.exists() or (config.zone_root / zone_filename(domain)).exists()
+    _, vhost = site_paths(domain, config)
+    return (
+        any(root.exists() for root in _website_roots(domain, config))
+        or vhost.exists()
+        or (config.zone_root / zone_filename(domain)).exists()
+    )
 
 
 def backup_existing_site(domain: str, config: AppConfig) -> Path:
-    root, _ = site_paths(domain, config)
     zone = config.zone_root / zone_filename(domain)
-    sources = [path for path in (zone, root) if path.exists()]
+    sources = [path for path in [zone, *_website_roots(domain, config)] if path.exists()]
     database_dump = config.backup_root / f".{domain}.sql"
     if config.mysql_admin_password:
         candidate = DatabaseCredentials(

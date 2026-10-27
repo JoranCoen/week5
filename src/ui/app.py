@@ -205,8 +205,8 @@ class ProvisioningApp(App[None]):
         try:
             result = provision(request, self.config)
         except ExistingSiteError as error:
-            self._reset_provision_button()
-            self._status(str(error))
+            self._status(f"Backup gemaakt. {error}")
+            self._mark_backup_created()
         except PermissionError as error:
             self._reset_provision_button()
             self._status(f"Rechten ontbreken. {error}")
@@ -271,6 +271,11 @@ class ProvisioningApp(App[None]):
     def _mark_provisioned(self) -> None:
         button = self.query_one("#provision", Button)
         button.label = "[green]✓[/]  Website aangemaakt"
+        button.add_class("request-valid")
+
+    def _mark_backup_created(self) -> None:
+        button = self.query_one("#provision", Button)
+        button.label = "[green]✓[/]  Backup gemaakt"
         button.add_class("request-valid")
 
     def _update_toggle(

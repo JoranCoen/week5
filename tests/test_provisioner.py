@@ -7,7 +7,7 @@ from src.config import AppConfig
 from src.models import ProvisionRequest, WebsiteType
 from src.services.backup import create_backup
 from src.services.provisioner import provision
-from src.services.provisioner import ExistingSiteError
+from src.services.provisioner import ExistingSiteError, backup_existing_site
 from src.services.provisioner import check_permissions
 from src.services.bind import zone_text
 from src.services.validation import normalise_domain
@@ -79,6 +79,24 @@ class ProvisionerTests(unittest.TestCase):
                 (existing_root / "index.html").read_text(encoding="utf-8"),
                 "original",
             )
+            self.assertEqual(len(list(config.backup_root.glob("*.tar.7z"))), 1)
+
+    def test_existing_vhosts_layout_is_backed_up(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config = AppConfig(
+                backup_root=root / "backups",
+                zone_root=root / "zones",
+                document_root=root / "www",
+                vhost_root=root / "vhosts",
+                certificate_root=root / "certs",
+                dry_run=True,
+            )
+            existing_root = config.document_root / "vhosts" / "klant3.sil"
+            existing_root.mkdir(parents=True)
+            (existing_root / "index.php").write_text("todo", encoding="utf-8")
+            archive = backup_existing_site("klant3.sil", config)
+            self.assertTrue(archive.name.endswith(".tar.7z"))
             self.assertEqual(len(list(config.backup_root.glob("*.tar.7z"))), 1)
 
     def test_dry_run_skips_system_permission_check(self):
